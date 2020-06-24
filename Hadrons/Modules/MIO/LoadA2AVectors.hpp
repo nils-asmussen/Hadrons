@@ -44,7 +44,8 @@ public:
     GRID_SERIALIZABLE_CLASS_MEMBERS(LoadA2AVectorsPar,
                                     std::string,  filestem,
                                     bool,         multiFile,
-                                    unsigned int, size);
+                                    unsigned int, size,
+                                    std::string, gaugeXform);
 };
 
 template <typename FImpl>
@@ -52,6 +53,7 @@ class TLoadA2AVectors: public Module<LoadA2AVectorsPar>
 {
 public:
     FERM_TYPE_ALIASES(FImpl,);
+    typedef typename FImpl::GaugeLinkField GaugeMat;
 public:
     // constructor
     TLoadA2AVectors(const std::string name);
@@ -82,6 +84,11 @@ template <typename FImpl>
 std::vector<std::string> TLoadA2AVectors<FImpl>::getInput(void)
 {
     std::vector<std::string> in;
+
+    if (!par().gaugeXform.empty())
+    {
+        in = {par().gaugeXform};
+    }
     
     return in;
 }
@@ -109,6 +116,23 @@ void TLoadA2AVectors<FImpl>::execute(void)
     auto &vec = envGet(std::vector<FermionField>, getName());
 
     A2AVectorsIo::read(vec, par().filestem, par().multiFile, vm().getTrajectory());
+
+    if (!par().gaugeXform.empty())
+    {
+
+        LOG(Message) << "Applying gauge transformation to A2A vectors "
+                     << getName() << " using " << par().gaugeXform << std::endl;
+        auto &xform = envGet(GaugeMat, par().gaugeXform);
+
+        startTimer("Transform application");
+        for (unsigned int i = 0; i < par().size; i++)
+        {
+            LOG(Message) << "Applying gauge transformation to A2A vector i = "
+                         << i << "/" << par().size << std::endl;
+            vec[i] = xform * vec[i];
+        }
+        stopTimer("Transform application");
+    }
 }
 
 END_MODULE_NAMESPACE

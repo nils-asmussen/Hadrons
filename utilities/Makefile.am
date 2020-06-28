@@ -3,6 +3,7 @@ AM_CXXFLAGS += -I$(top_srcdir)
 
 bin_PROGRAMS = \
   HadronsContractor          \
+  HadronsContractor_C        \
   HadronsContractorBenchmark \
   HadronsXmlRun              \
   HadronsXmlValidate         \
@@ -20,6 +21,9 @@ HadronsFermionEP64To32_LDADD    = -lHadrons -lGrid
 
 HadronsContractor_SOURCES = Contractor.cpp
 HadronsContractor_LDADD   = -lHadrons -lGrid
+
+HadronsContractor_C_SOURCES = Contractor_C.cpp
+HadronsContractor_C_LDADD   = -lHadrons -lGrid
 
 HadronsContractorBenchmark_SOURCES = ContractorBenchmark.cpp
 HadronsContractorBenchmark_LDADD   = -lHadrons -lGrid
